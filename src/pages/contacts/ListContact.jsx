@@ -1,20 +1,34 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
-import { Paper } from "@mui/material";
+import { Button, Paper, Snackbar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
 
 function ListContact() {
   const [data, setData] = useState([]);
+  const [isDeleteEnable, setIsDeleteEnable] = useState(true);
+  const [idsToDelete, setIdsToDelete] = useState([]);
+  const navigate = useNavigate();
+
+  const [stateMsg, setStateMsg] = React.useState({
+    openMsg: false,
+    vertical: "top",
+    horizontal: "center",
+  });
+  const { vertical, horizontal, openMsg } = stateMsg;
+
+  const handleCloseMsg = () => {
+    setStateMsg({ ...stateMsg, openMsg: false });
+  };
 
   const fetchContacts = async () => {
-    const token = localStorage.getItem("token");
     const ans = await api.get("contact/all");
     setData(ans.data.data);
   };
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+  }, [openMsg]);
 
   const columns = [
     { field: "display_name", headerName: "Name" },
@@ -30,20 +44,62 @@ function ListContact() {
     },
   ];
 
-  console.log("data = ", data);
   const paginationModel = { page: 0, pageSize: 5 };
 
+  const handleSelectedRow = (rows) => {
+    if (rows.ids.size > 0) {
+      setIsDeleteEnable(false);
+    } else {
+      setIsDeleteEnable(true);
+    }
+    for (let temp of rows.ids) {
+      setIdsToDelete([...idsToDelete, temp]);
+    }
+  };
+
+  const handleDelete = async () => {
+    for (const id of idsToDelete) {
+      const result = await api.delete(`/contact/${id}`);
+      console.log("Result = ", result.data.message);
+      setStateMsg({ ...stateMsg, openMsg: true });
+    }
+  };
+
   return (
-    <Paper sx={{ height: 400, width: "100%" }}>
-      <DataGrid
-        rows={data}
-        columns={columns}
-        initialState={{ pagination: { paginationModel } }}
-        pageSizeOptions={[5, 10]}
-        checkboxSelection
-        sx={{ border: 0 }}
+    <>
+      <Paper sx={{ height: 400, width: "100%" }}>
+        <Button
+          onClick={() => handleDelete()}
+          variant="outlined"
+          color="error"
+          disabled={isDeleteEnable}
+        >
+          DELETE
+        </Button>
+        <Button
+          onClick={() => navigate("/contact/add")}
+          variant="outlined"
+          color="primary"
+        >
+          Add Contact
+        </Button>
+        <DataGrid
+          rows={data}
+          columns={columns}
+          initialState={{ pagination: { paginationModel } }}
+          pageSizeOptions={[5, 10]}
+          checkboxSelection
+          onRowSelectionModelChange={(rows) => handleSelectedRow(rows)}
+          sx={{ border: 0 }}
+        />
+      </Paper>
+      <Snackbar
+        open={openMsg}
+        autoHideDuration={6000}
+        onClose={handleCloseMsg}
+        message="Contact Deleted SUccessfully"
       />
-    </Paper>
+    </>
   );
 }
 

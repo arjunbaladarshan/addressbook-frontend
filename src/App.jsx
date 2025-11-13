@@ -12,6 +12,7 @@ import HomePage from "./pages";
 import ProtectedRoute from "./context/ProtectedRoute";
 import AboutPage from "./pages/about/AboutPage";
 import ListContact from "./pages/contacts/ListContact";
+import AddContact from "./pages/contacts/AddContact";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -25,6 +26,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contacts" element={<ListContact />} />
+          <Route path="/contact/add" element={<AddContact />} />
         </Route>
       </Routes>
     </BrowserRouter>
