@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 function ListContact() {
   const [data, setData] = useState([]);
   const [isDeleteEnable, setIsDeleteEnable] = useState(true);
+  const [isEditEnable, setIsEditEnable] = useState(true);
   const [idsToDelete, setIdsToDelete] = useState([]);
   const navigate = useNavigate();
 
@@ -52,6 +53,11 @@ function ListContact() {
     } else {
       setIsDeleteEnable(true);
     }
+    if (rows.ids.size == 1) {
+      setIsEditEnable(false);
+    } else {
+      setIsEditEnable(true);
+    }
     for (let temp of rows.ids) {
       setIdsToDelete([...idsToDelete, temp]);
     }
@@ -65,6 +71,10 @@ function ListContact() {
     }
   };
 
+  const handleEdit = async () => {
+    navigate(`/contact/edit/${idsToDelete[0]}`);
+  };
+
   return (
     <>
       <Paper sx={{ height: 400, width: "100%" }}>
@@ -75,6 +85,14 @@ function ListContact() {
           disabled={isDeleteEnable}
         >
           DELETE
+        </Button>
+        <Button
+          onClick={() => handleEdit()}
+          variant="outlined"
+          color="error"
+          disabled={isEditEnable}
+        >
+          EDIT
         </Button>
         <Button
           onClick={() => navigate("/contact/add")}
